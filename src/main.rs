@@ -35,7 +35,8 @@ fn main() {
     let config = Config::new(&matches);
     let mut counter = Counter::new(&config);
 
-    let _ = counter.count();
-
-    println!("{:?}", counter);
+    match counter.count() {
+        Err(e) => panic!("Failed to count: {}", e),
+        Ok(counter) => println!("{:?}", counter),
+    };
 }

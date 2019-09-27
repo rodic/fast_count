@@ -1,12 +1,13 @@
+use super::config::Config;
+use std::convert::TryInto;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader, Lines};
-use super::config::{Config};
 
 #[derive(Debug)]
 pub struct Counter {
     filename: String,
-    number_of_lines: Option<u32>,
-    number_of_words: Option<u32>,
+    number_of_lines: Option<i32>,
+    number_of_words: Option<i32>,
 }
 
 impl Counter {
@@ -21,18 +22,22 @@ impl Counter {
         }
     }
 
-    pub fn count(&mut self) -> Result<(), io::Error> {
+    pub fn count(&mut self) -> Result<&Counter, io::Error> {
         for line in Counter::get_lines(&self.filename)? {
             self.number_of_lines = Counter::add(self.number_of_lines, 1);
             self.number_of_words = Counter::add(
                 self.number_of_words,
-                line?.split_whitespace().count() as u32
+                Counter::count_words_in_line(&line?)
             );
         }
-        Ok(())
+        Ok(&*self)
     }
 
-    fn flag_to_option(flag: bool) -> Option<u32> {
+    fn count_words_in_line(line: &str) -> i32 {
+        line.split_whitespace().count().try_into().unwrap()
+    }
+
+    fn flag_to_option(flag: bool) -> Option<i32> {
         if flag {
             Some(0)
         } else {
@@ -40,7 +45,7 @@ impl Counter {
         }
     }
 
-    fn add(option: Option<u32>, increment: u32) -> Option<u32> {
+    fn add(option: Option<i32>, increment: i32) -> Option<i32> {
         match option {
             Some(n) => Some(n + increment),
             None => None,
