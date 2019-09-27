@@ -3,26 +3,26 @@ use std::io::{self, prelude::*, BufReader, Lines};
 use super::config::{Config};
 
 #[derive(Debug)]
-pub struct Counter<'a> {
-    config: &'a Config<'a>,
+pub struct Counter {
+    filename: String,
     number_of_lines: Option<u32>,
     number_of_words: Option<u32>,
 }
 
-impl<'a> Counter<'a> {
-    pub fn new(config: &'a Config) -> Counter<'a> {
+impl Counter {
+    pub fn new(config: &Config) -> Counter {
         let number_of_lines = Counter::flag_to_option(config.should_count_lines);
         let number_of_words = Counter::flag_to_option(config.should_count_words);
 
         Counter {
-            config,
+            filename: String::from(config.filename),
             number_of_lines,
             number_of_words,
         }
     }
 
     pub fn count(&mut self) -> Result<(), io::Error> {
-        for line in Counter::get_lines(self.config.filename)? {
+        for line in Counter::get_lines(&self.filename)? {
             self.number_of_lines = Counter::add(self.number_of_lines, 1);
             self.number_of_words = Counter::add(
                 self.number_of_words,
