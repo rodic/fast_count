@@ -3,20 +3,17 @@ extern crate clap;
 use clap::ArgMatches;
 
 #[derive(Debug)]
-pub struct Config<'a> {
-    pub filename: &'a str,
+pub struct Config {
     pub should_count_lines: bool,
     pub should_count_words: bool,
 }
 
-impl<'a> Config<'a> {
-    pub fn new(matches: &'a ArgMatches) -> Config<'a> {
-        let filename = matches.value_of("FILE").unwrap();
+impl Config {
+    pub fn new(matches: &ArgMatches) -> Config {
         let should_count_lines = Config::parse_flag(matches, "lines");
         let should_count_words = Config::parse_flag(matches, "words");
 
         Config {
-            filename,
             should_count_lines,
             should_count_words,
         }

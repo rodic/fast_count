@@ -26,17 +26,25 @@ fn main() {
         )
         .arg(
             Arg::with_name("FILE")
-                .help("Sets the input file to use")
+                .help("Sets the input files to use")
                 .required(true)
+                .multiple(true)
                 .index(1),
         )
         .get_matches();
 
+    let filenames: Vec<&str> = matches.values_of("FILE").unwrap().collect();
     let config = Config::new(&matches);
-    let mut counter = Counter::new(&config);
 
-    match counter.count() {
-        Err(e) => panic!("Failed to count: {}", e),
-        Ok(counter) => println!("{:?}", counter),
-    };
+    let counters: Vec<Counter> = filenames
+        .iter()
+        .map(|filename| Counter::new(filename, &config))
+        .collect();
+
+    for mut counter in counters {
+        match &counter.count() {
+            Err(e) => panic!("Failed to count: {}", e),
+            Ok(_) => println!("{:?}", counter),
+        };
+    }
 }
