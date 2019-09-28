@@ -4,19 +4,19 @@ use std::fs::File;
 use std::io::{self, prelude::*, BufReader, Lines};
 
 #[derive(Debug)]
-pub struct Counter<'a> {
-    filename: &'a str,
+pub struct Counter {
+    pub filename: String,
     number_of_lines: Option<i32>,
     number_of_words: Option<i32>,
 }
 
-impl <'a>Counter<'a> {
-    pub fn new(filename: &'a str, config: &Config) -> Counter<'a> {
+impl Counter {
+    pub fn new(filename: &str, config: &Config) -> Counter {
         let number_of_lines = Counter::flag_to_option(config.should_count_lines);
         let number_of_words = Counter::flag_to_option(config.should_count_words);
 
         Counter {
-            filename,
+            filename: String::from(filename),
             number_of_lines,
             number_of_words,
         }

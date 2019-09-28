@@ -3,6 +3,7 @@ extern crate clap;
 use clap::{App, AppSettings, Arg};
 use fast_count::config::Config;
 use fast_count::counter::Counter;
+use fast_count::runner::run;
 
 fn main() {
     let matches = App::new("Fast count")
@@ -41,10 +42,5 @@ fn main() {
         .map(|filename| Counter::new(filename, &config))
         .collect();
 
-    for mut counter in counters {
-        match &counter.count() {
-            Err(e) => panic!("Failed to count: {}", e),
-            Ok(_) => println!("{:?}", counter),
-        };
-    }
+    run(counters)
 }
