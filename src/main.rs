@@ -3,7 +3,8 @@ extern crate clap;
 use clap::{App, AppSettings, Arg};
 use fast_count::config::Config;
 use fast_count::counter::Counter;
-use fast_count::runner::run;
+use fast_count::filename_parser;
+use fast_count::runner;
 
 fn main() {
     let matches = App::new("Fast count")
@@ -28,13 +29,13 @@ fn main() {
         .arg(
             Arg::with_name("FILE")
                 .help("Sets the input files to use")
-                .required(true)
+                .required(false)
                 .multiple(true)
                 .index(1),
         )
         .get_matches();
 
-    let filenames: Vec<&str> = matches.values_of("FILE").unwrap().collect();
+    let filenames = filename_parser::parse(matches.values_of("FILE"));
     let config = Config::new(&matches);
 
     let counters: Vec<Counter> = filenames
@@ -43,5 +44,5 @@ fn main() {
         .map(|(i, filename)| Counter::new(i, filename, &config))
         .collect();
 
-    run(counters)
+    runner::run(counters)
 }

@@ -1,10 +1,10 @@
 use super::config::Config;
+use super::input_reader::InputReader;
 use std::cmp::Ordering;
 use std::convert::TryInto;
-use std::fs::File;
-use std::io::{self, prelude::*, BufReader, Lines};
+use std::io::{self, BufRead};
 
-#[derive(Debug, Eq)]
+#[derive(Debug)]
 pub struct Counter {
     id: usize,
     pub filename: String,
@@ -30,6 +30,8 @@ impl PartialEq for Counter {
     }
 }
 
+impl Eq for Counter {}
+
 impl Counter {
     pub fn new(id: usize, filename: &str, config: &Config) -> Counter {
         let number_of_lines = Counter::flag_to_option(config.should_count_lines);
@@ -44,7 +46,7 @@ impl Counter {
     }
 
     pub fn count(&mut self) -> Result<&Counter, io::Error> {
-        for line in Counter::get_lines(&self.filename)? {
+        for line in InputReader::new(&self.filename).read().lines() {
             self.number_of_lines = Counter::add(self.number_of_lines, 1);
             self.number_of_words =
                 Counter::add(self.number_of_words, Counter::count_words_in_line(&line?));
@@ -69,10 +71,5 @@ impl Counter {
             Some(n) => Some(n + increment),
             None => None,
         }
-    }
-
-    fn get_lines(filename: &str) -> io::Result<Lines<BufReader<File>>> {
-        let file = File::open(filename)?;
-        Ok(BufReader::new(file).lines())
     }
 }
