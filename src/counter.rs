@@ -1,21 +1,42 @@
 use super::config::Config;
+use std::cmp::Ordering;
 use std::convert::TryInto;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader, Lines};
 
-#[derive(Debug)]
+#[derive(Debug, Eq)]
 pub struct Counter {
+    id: usize,
     pub filename: String,
     number_of_lines: Option<u32>,
     number_of_words: Option<u32>,
 }
 
+impl Ord for Counter {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.id.cmp(&other.id)
+    }
+}
+
+impl PartialOrd for Counter {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.id.cmp(&other.id))
+    }
+}
+
+impl PartialEq for Counter {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
 impl Counter {
-    pub fn new(filename: &str, config: &Config) -> Counter {
+    pub fn new(id: usize, filename: &str, config: &Config) -> Counter {
         let number_of_lines = Counter::flag_to_option(config.should_count_lines);
         let number_of_words = Counter::flag_to_option(config.should_count_words);
 
         Counter {
+            id,
             filename: String::from(filename),
             number_of_lines,
             number_of_words,
@@ -25,10 +46,8 @@ impl Counter {
     pub fn count(&mut self) -> Result<&Counter, io::Error> {
         for line in Counter::get_lines(&self.filename)? {
             self.number_of_lines = Counter::add(self.number_of_lines, 1);
-            self.number_of_words = Counter::add(
-                self.number_of_words,
-                Counter::count_words_in_line(&line?)
-            );
+            self.number_of_words =
+                Counter::add(self.number_of_words, Counter::count_words_in_line(&line?));
         }
         Ok(&*self)
     }

@@ -14,10 +14,18 @@ pub fn run(counters: Vec<Counter>) {
         });
     }
 
+    let mut counters: Vec<Counter> = vec![];
+
     for _ in 0..number_of_workers {
         match rx.recv() {
-            Ok(c) => println!("{:?}", c),
+            Ok(c) => counters.push(c),
             Err(e) => panic!("Failed to perform count {}", e),
         };
+    }
+
+    counters.sort();
+
+    for counter in counters {
+        println!("{:?}", counter);
     }
 }

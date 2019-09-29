@@ -39,7 +39,8 @@ fn main() {
 
     let counters: Vec<Counter> = filenames
         .iter()
-        .map(|filename| Counter::new(filename, &config))
+        .enumerate()
+        .map(|(i, filename)| Counter::new(i, filename, &config))
         .collect();
 
     run(counters)
