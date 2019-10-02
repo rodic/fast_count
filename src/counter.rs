@@ -2,9 +2,9 @@ use super::config::Config;
 use super::input_reader::InputReader;
 use std::cmp::Ordering;
 use std::convert::TryInto;
+use std::fmt::{self, Display, Formatter};
 use std::io::{self, BufRead};
 
-#[derive(Debug)]
 pub struct Counter {
     id: usize,
     pub filename: String,
@@ -32,10 +32,21 @@ impl PartialEq for Counter {
 
 impl Eq for Counter {}
 
+impl Display for Counter {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let mut result = String::new();
+        result.push_str(&Counter::format_option(self.number_of_lines));
+        result.push_str(&Counter::format_option(self.number_of_words));
+        result.push_str(&self.filename);
+
+        write!(f, "{}", result)
+    }
+}
+
 impl Counter {
     pub fn new(id: usize, filename: &str, config: &Config) -> Counter {
-        let number_of_lines = Counter::flag_to_option(config.should_count_lines);
-        let number_of_words = Counter::flag_to_option(config.should_count_words);
+        let number_of_lines = Counter::flag_to_option(config.count_lines);
+        let number_of_words = Counter::flag_to_option(config.count_words);
 
         Counter {
             id,
@@ -47,9 +58,13 @@ impl Counter {
 
     pub fn count(&mut self) -> Result<&Counter, io::Error> {
         for line in InputReader::new(&self.filename).read().lines() {
-            self.number_of_lines = Counter::add(self.number_of_lines, 1);
-            self.number_of_words =
-                Counter::add(self.number_of_words, Counter::count_words_in_line(&line?));
+            if let Some(n) = self.number_of_lines {
+                self.number_of_lines = Some(n + 1);
+            }
+
+            if let Some(n) = self.number_of_words {
+                self.number_of_words = Some(n + Counter::count_words_in_line(&line?));
+            }
         }
         Ok(&*self)
     }
@@ -66,10 +81,11 @@ impl Counter {
         }
     }
 
-    fn add(option: Option<u32>, increment: u32) -> Option<u32> {
-        match option {
-            Some(n) => Some(n + increment),
-            None => None,
+    fn format_option(n: Option<u32>) -> String {
+        if let Some(n) = n {
+            format!("{:7} ", n)
+        } else {
+            String::from("")
         }
     }
 }

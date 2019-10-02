@@ -26,6 +26,6 @@ pub fn run(counters: Vec<Counter>) {
     counters.sort();
 
     for counter in counters {
-        println!("{:?}", counter);
+        println!("{}", counter);
     }
 }
