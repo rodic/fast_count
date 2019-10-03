@@ -3,16 +3,20 @@ use clap::ArgMatches;
 pub struct Config {
     pub count_lines: bool,
     pub count_words: bool,
+    pub count_bytes: bool,
 }
 
 impl Config {
     pub fn new(matches: &ArgMatches) -> Config {
+        let count_bytes = Config::parse_flag(matches, "bytes");
         let count_lines = Config::parse_flag(matches, "lines");
         let count_words = Config::parse_flag(matches, "words");
 
-        let (count_lines, count_words) = Config::with_defaults(count_lines, count_words);
+        let (count_bytes, count_lines, count_words) =
+            Config::with_defaults(count_bytes, count_lines, count_words);
 
         Config {
+            count_bytes,
             count_lines,
             count_words,
         }
@@ -25,11 +29,11 @@ impl Config {
         }
     }
 
-    fn with_defaults(count_lines: bool, count_words: bool) -> (bool, bool) {
-        if let (false, false) = (count_lines, count_words) {
-            (true, true)
+    fn with_defaults(count_bytes: bool, count_lines: bool, count_words: bool) -> (bool, bool, bool) {
+        if let (false, false, false) = (count_bytes, count_lines, count_words) {
+            (true, true, true)
         } else {
-            (count_lines, count_words)
+            (count_bytes, count_lines, count_words)
         }
     }
 }

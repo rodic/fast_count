@@ -21,6 +21,13 @@ The options below may be used to select which counts are printed, always in the 
         )
         .setting(AppSettings::AllowMissingPositional)
         .arg(
+            Arg::with_name("bytes")
+                .short("c")
+                .long("bytes")
+                .required(false)
+                .help("Prints the byte counts"),
+        )
+        .arg(
             Arg::with_name("lines")
                 .short("l")
                 .long("lines")
