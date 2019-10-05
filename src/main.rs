@@ -42,6 +42,13 @@ The options below may be used to select which counts are printed, always in the 
                 .help("Prints the newline counts"),
         )
         .arg(
+            Arg::with_name("max-line-length")
+                .short("L")
+                .long("max-line-length")
+                .required(false)
+                .help("Prints the maximum display width"),
+        )
+        .arg(
             Arg::with_name("words")
                 .short("w")
                 .long("words")

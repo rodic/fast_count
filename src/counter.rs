@@ -11,6 +11,7 @@ pub struct Counter {
     number_of_words: Option<u32>,
     number_of_chars: Option<u32>,
     number_of_bytes: Option<u32>,
+    max_line_length: Option<u32>,
 }
 
 impl Ord for Counter {
@@ -40,6 +41,7 @@ impl Display for Counter {
         result.push_str(&Counter::format_option(self.number_of_words));
         result.push_str(&Counter::format_option(self.number_of_chars));
         result.push_str(&Counter::format_option(self.number_of_bytes));
+        result.push_str(&Counter::format_option(self.max_line_length));
         result.push_str(&self.filename);
 
         write!(f, "{}", result)
@@ -52,6 +54,7 @@ impl Counter {
         let number_of_words = Counter::flag_to_option(config.count_words);
         let number_of_chars = Counter::flag_to_option(config.count_chars);
         let number_of_bytes = Counter::flag_to_option(config.count_bytes);
+        let max_line_length = Counter::flag_to_option(config.count_max_line_length);
 
         Counter {
             id,
@@ -60,6 +63,7 @@ impl Counter {
             number_of_words,
             number_of_chars,
             number_of_bytes,
+            max_line_length,
         }
     }
 
@@ -71,6 +75,7 @@ impl Counter {
             number_of_words: None,
             number_of_chars: None,
             number_of_bytes: None,
+            max_line_length: None,
         }
     }
 
@@ -95,6 +100,9 @@ impl Counter {
                     }
                     if let Some(n) = self.number_of_bytes {
                         self.number_of_bytes = Some(n + number_of_bytes as u32)
+                    }
+                    if let Some(n) = self.max_line_length {
+                        self.max_line_length = Some(n.max(line.trim_end().len() as u32));
                     }
                 }
                 Err(e) => panic!(e),
@@ -133,6 +141,7 @@ impl Counter {
         let number_of_words = Counter::sum_options(self.number_of_words, other.number_of_words);
         let number_of_chars = Counter::sum_options(self.number_of_chars, other.number_of_chars);
         let number_of_bytes = Counter::sum_options(self.number_of_bytes, other.number_of_bytes);
+        let max_line_length = Counter::max_options(self.max_line_length, other.max_line_length);
 
         Counter {
             id: 0,
@@ -141,12 +150,21 @@ impl Counter {
             number_of_words,
             number_of_chars,
             number_of_bytes,
+            max_line_length,
         }
     }
 
     fn sum_options(x: Option<u32>, y: Option<u32>) -> Option<u32> {
         match (x, y) {
             (Some(x), Some(y)) => Some(x + y),
+            (None, y) => y,
+            (x, None) => x,
+        }
+    }
+
+    fn max_options(x: Option<u32>, y: Option<u32>) -> Option<u32> {
+        match (x, y) {
+            (Some(x), Some(y)) => Some(x.max(y)),
             (None, y) => y,
             (x, None) => x,
         }
