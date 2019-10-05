@@ -28,6 +28,13 @@ The options below may be used to select which counts are printed, always in the 
                 .help("Prints the byte counts"),
         )
         .arg(
+            Arg::with_name("chars")
+                .short("m")
+                .long("chars")
+                .required(false)
+                .help("Prints the character counts"),
+        )
+        .arg(
             Arg::with_name("lines")
                 .short("l")
                 .long("lines")
