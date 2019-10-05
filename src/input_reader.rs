@@ -16,7 +16,7 @@ impl InputReader {
         }
     }
 
-    pub fn read<'a>(&'a self) -> Box<dyn BufRead + 'a> {
+    pub fn get_buffer_reader<'a>(&'a self) -> Box<dyn BufRead + 'a> {
         match self {
             InputReader::StdinReader(stdin) => Box::new(stdin.lock()),
             InputReader::FileReader(filename) => {

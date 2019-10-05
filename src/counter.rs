@@ -1,7 +1,6 @@
 use super::config::Config;
 use super::input_reader::InputReader;
 use std::cmp::Ordering;
-use std::convert::TryInto;
 use std::fmt::{self, Display, Formatter};
 use std::io::{self, BufRead};
 
@@ -61,28 +60,34 @@ impl Counter {
     }
 
     pub fn count(&mut self) -> Result<&Counter, io::Error> {
-        for line in InputReader::new(&self.filename).read().lines() {
-            let line = line?;
-            if let Some(n) = self.number_of_bytes {
-                self.number_of_bytes = Some(n + Counter::count_bytes_in_line(&line))
-            }
-            if let Some(n) = self.number_of_lines {
-                self.number_of_lines = Some(n + 1);
-            }
+        let mut line = String::new();
 
-            if let Some(n) = self.number_of_words {
-                self.number_of_words = Some(n + Counter::count_words_in_line(&line));
+        let input_reader = InputReader::new(&self.filename);
+        let mut buffer_reader = input_reader.get_buffer_reader();
+
+        loop {
+            match buffer_reader.read_line(&mut line) {
+                Ok(0) => break,
+                Ok(number_of_bytes) => {
+                    if let Some(n) = self.number_of_bytes {
+                        self.number_of_bytes = Some(n + number_of_bytes as u32)
+                    }
+                    if let Some(n) = self.number_of_lines {
+                        self.number_of_lines = Some(n + 1);
+                    }
+                    if let Some(n) = self.number_of_words {
+                        self.number_of_words = Some(n + Counter::count_words_in_line(&line));
+                    }
+                }
+                Err(e) => panic!(e),
             }
+            line.clear();
         }
         Ok(&*self)
     }
 
     fn count_words_in_line(line: &str) -> u32 {
-        line.split_whitespace().count().try_into().unwrap()
-    }
-
-    fn count_bytes_in_line(line: &str) -> u32 {
-        line.as_bytes().len().try_into().unwrap()
+        line.split_whitespace().count() as u32
     }
 
     fn flag_to_option(flag: bool) -> Option<u32> {
@@ -95,7 +100,7 @@ impl Counter {
 
     fn format_option(n: Option<u32>) -> String {
         if let Some(n) = n {
-            format!("{:7} ", n)
+            format!("{}\t", n)
         } else {
             String::from("")
         }
