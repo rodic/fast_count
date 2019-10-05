@@ -59,6 +59,16 @@ impl Counter {
         }
     }
 
+    pub fn null_counter() -> Counter {
+        Counter {
+            id: 0,
+            filename: String::new(),
+            number_of_bytes: None,
+            number_of_lines: None,
+            number_of_words: None,
+        }
+    }
+
     pub fn count(&mut self) -> Result<&Counter, io::Error> {
         let mut line = String::new();
 
@@ -100,9 +110,31 @@ impl Counter {
 
     fn format_option(n: Option<u32>) -> String {
         if let Some(n) = n {
-            format!("{}\t", n)
+            format!("{:>7} ", n)
         } else {
             String::from("")
+        }
+    }
+
+    pub fn add(&self, other: &Counter) -> Counter {
+        let number_of_bytes = Counter::sum_options(self.number_of_bytes, other.number_of_bytes);
+        let number_of_lines = Counter::sum_options(self.number_of_lines, other.number_of_lines);
+        let number_of_words = Counter::sum_options(self.number_of_words, other.number_of_words);
+
+        Counter {
+            id: 0,
+            filename: String::from("total"),
+            number_of_bytes,
+            number_of_lines,
+            number_of_words,
+        }
+    }
+
+    fn sum_options(x: Option<u32>, y: Option<u32>) -> Option<u32> {
+        match (x, y) {
+            (Some(x), Some(y)) => Some(x + y),
+            (None, y) => y,
+            (x, None) => x,
         }
     }
 }

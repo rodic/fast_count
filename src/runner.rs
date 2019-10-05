@@ -24,8 +24,18 @@ pub fn run(counters: Vec<Counter>) {
     }
 
     counters.sort();
+    print_results(&counters);
+}
 
+fn print_results(counters: &Vec<Counter>) {
     for counter in counters {
         println!("{}", counter);
+    }
+
+    if counters.len() > 1 {
+        let total = counters
+            .iter()
+            .fold(Counter::null_counter(), |acc, c| acc.add(c));
+        println!("{}", total);
     }
 }
